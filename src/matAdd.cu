@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <random>
 
 using namespace std;
 
@@ -42,18 +43,25 @@ void matAdd(float *h_A, float *h_B, float *h_C, int side){
 int main(int argc, char **argv){
     // Define input vectors
     const int SIDE=100;
-    vector<float> h_A(SIDE * SIDE, 10.0f);
-    vector<float> h_B(SIDE * SIDE, 20.0f);
+    vector<float> h_A(SIDE * SIDE, 0.0f);
+    vector<float> h_B(SIDE * SIDE, 0.0f);
     vector<float> h_C(SIDE * SIDE, 0.0f);
 
     // Initialise values for A and B
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_real_distribution<float> dist(0.0, 100.0);
     for (size_t i=0; i < (SIDE * SIDE); i++){
-        // TODO: Generate random numbers here
+        h_A[i] = dist(gen);
+        h_B[i] = dist(gen);
     }
 
     // Launch matrix addition
     matAdd(h_A.data(), h_B.data(), h_C.data(), SIDE);
 
+    // Quick check
+    cout << h_A[0] << endl;
+    cout << h_B[0] << endl;
     cout << h_C[0] << endl;
 
     return 0;
