@@ -16,13 +16,13 @@ void benchmarkWrong(float *h_A, float *h_B, float *h_C, int m, int k, int n){
     int sizeA = m * k * sizeof(float);
     int sizeB = k * n * sizeof(float);
     int sizeC = m * n * sizeof(float);
-    cudaMalloc((void **)&d_A, sizeA);
-    cudaMalloc((void **)&d_B, sizeB);
-    cudaMalloc((void **)&d_C, sizeC);
+    CHECK_CUDA_ERROR(cudaMalloc((void **)&d_A, sizeA));
+    CHECK_CUDA_ERROR(cudaMalloc((void **)&d_B, sizeB));
+    CHECK_CUDA_ERROR(cudaMalloc((void **)&d_C, sizeC));
 
     // Copy input data to device
-    cudaMemcpy(d_A, h_A, sizeA, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, h_B, sizeB, cudaMemcpyHostToDevice);
+    CHECK_CUDA_ERROR(cudaMemcpy(d_A, h_A, sizeA, cudaMemcpyHostToDevice));
+    CHECK_CUDA_ERROR(cudaMemcpy(d_B, h_B, sizeB, cudaMemcpyHostToDevice));
 
     // Start measuring time (wrong!)
     auto start = chrono::steady_clock::now();
@@ -32,22 +32,23 @@ void benchmarkWrong(float *h_A, float *h_B, float *h_C, int m, int k, int n){
     dim3 gridDim((n + blockDim.x - 1) / blockDim.x, (m + blockDim.y - 1) / blockDim.y, 1); 
     benchmark::matMulKernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, m, k, n);
 
-    // Simulate CPU work
-
     // Finish measuring time (wrong!)
     auto end = chrono::steady_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
     cout << "Kernel took: " << duration.count() << "us" << endl;
 
+    // Check for sync errors in the kernel launch
+    CHECK_LAST_CUDA_ERROR();
+
     // Copy output to host
     // cudaMemcpy(...) synchronizes indirectly, for demonstration purposes 
     // leave it outside of the benchmark to make it even worse
-    cudaMemcpy(h_C, d_C, sizeC, cudaMemcpyDeviceToHost);
+    CHECK_CUDA_ERROR(cudaMemcpy(h_C, d_C, sizeC, cudaMemcpyDeviceToHost));
 
     // Free memory
-    cudaFree(d_A);
-    cudaFree(d_B);
-    cudaFree(d_C);
+    CHECK_CUDA_ERROR(cudaFree(d_A));
+    CHECK_CUDA_ERROR(cudaFree(d_B));
+    CHECK_CUDA_ERROR(cudaFree(d_C));
 }
 
 int main(int argc, char **argv){

@@ -5,10 +5,36 @@
 #include <vector>
 #include <random>
 
+#define CHECK_CUDA_ERROR(val) benchmark::check((val), #val, __FILE__, __LINE__)
+#define CHECK_LAST_CUDA_ERROR() benchmark::checkLast(__FILE__, __LINE__)
+
 namespace benchmark {
 
     // Error Handling
-    // TODO
+    // From https://leimao.github.io/blog/Proper-CUDA-Error-Checking/
+    void check(cudaError_t err, const char* const func, const char* const file,
+            const int line)
+    {
+        if (err != cudaSuccess)
+        {
+            std::cerr << "CUDA Runtime Error at: " << file << ":" << line
+                    << std::endl;
+            std::cerr << cudaGetErrorString(err) << " " << func << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
+    }
+
+    void checkLast(const char* const file, const int line)
+    {
+        cudaError_t const err{cudaGetLastError()};
+        if (err != cudaSuccess)
+        {
+            std::cerr << "CUDA Runtime Error at: " << file << ":" << line
+                    << std::endl;
+            std::cerr << cudaGetErrorString(err) << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
+    }
 
     // Kernel 
     // (naive approach, no shared memory tiling or extra optimizations)
