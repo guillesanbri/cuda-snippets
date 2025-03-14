@@ -1,6 +1,3 @@
-// 
-// This code is very wrong! Don't measure anything doing this.
-//
 #include <chrono>
 #include <iostream>
 #include <vector>
@@ -8,7 +5,7 @@
 
 using namespace std;
 
-void benchmarkWrong(float *h_A, float *h_B, float *h_C, int m, int k, int n){
+void benchmarkSync(float *h_A, float *h_B, float *h_C, int m, int k, int n){
     // Allocate GPU memory
     float *d_A;
     float *d_B;
@@ -24,7 +21,7 @@ void benchmarkWrong(float *h_A, float *h_B, float *h_C, int m, int k, int n){
     CHECK_CUDA_ERROR(cudaMemcpy(d_A, h_A, sizeA, cudaMemcpyHostToDevice));
     CHECK_CUDA_ERROR(cudaMemcpy(d_B, h_B, sizeB, cudaMemcpyHostToDevice));
 
-    // Start measuring time (wrong!)
+    // Start measuring time
     auto start = chrono::steady_clock::now();
 
     // Launch kernel
@@ -35,7 +32,7 @@ void benchmarkWrong(float *h_A, float *h_B, float *h_C, int m, int k, int n){
     // Wait for kernel to finish
     cudaDeviceSynchronize();
 
-    // Finish measuring time (wrong!)
+    // Finish measuring time
     auto end = chrono::steady_clock::now();
     auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
     cout << "Kernel took: " << duration.count() / 1000.f << "ms" << endl;
@@ -44,8 +41,6 @@ void benchmarkWrong(float *h_A, float *h_B, float *h_C, int m, int k, int n){
     CHECK_LAST_CUDA_ERROR();
 
     // Copy output to host
-    // cudaMemcpy(...) synchronizes indirectly, for demonstration purposes 
-    // leave it outside of the benchmark to make it even worse
     CHECK_CUDA_ERROR(cudaMemcpy(h_C, d_C, sizeC, cudaMemcpyDeviceToHost));
 
     // Free memory
@@ -78,7 +73,7 @@ int main(int argc, char **argv){
     benchmark::randomizeVector(B);
 
     // Run the benchmark
-    benchmarkWrong(A.data(), B.data(), C.data(), MATRIX_SIZE, MATRIX_SIZE, MATRIX_SIZE);
+    benchmarkSync(A.data(), B.data(), C.data(), MATRIX_SIZE, MATRIX_SIZE, MATRIX_SIZE);
 
     return 0;
 }
