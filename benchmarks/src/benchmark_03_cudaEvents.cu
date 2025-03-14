@@ -21,24 +21,30 @@ void benchmarkCudaEvents(float *h_A, float *h_B, float *h_C, int m, int k, int n
     CHECK_CUDA_ERROR(cudaMemcpy(d_A, h_A, sizeA, cudaMemcpyHostToDevice));
     CHECK_CUDA_ERROR(cudaMemcpy(d_B, h_B, sizeB, cudaMemcpyHostToDevice));
 
+    // Create CUDA events
+    cudaEvent_t start, stop;
+    CHECK_CUDA_ERROR(cudaEventCreate(&start));
+    CHECK_CUDA_ERROR(cudaEventCreate(&stop));
+
     // Start measuring time
-    auto start = chrono::steady_clock::now();
+    CHECK_CUDA_ERROR(cudaEventRecord(start, 0));
 
     // Launch kernel
     dim3 blockDim(32, 32, 1);
     dim3 gridDim((n + blockDim.x - 1) / blockDim.x, (m + blockDim.y - 1) / blockDim.y, 1); 
     benchmark::matMulKernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, m, k, n);
 
-    // Wait for kernel to finish
-    cudaDeviceSynchronize();
-
-    // Finish measuring time
-    auto end = chrono::steady_clock::now();
-    auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
-    cout << "Kernel took: " << duration.count() / 1000.f << "ms" << endl;
-
     // Check for sync errors in the kernel launch
     CHECK_LAST_CUDA_ERROR();
+
+    // Stop measuring time
+    CHECK_CUDA_ERROR(cudaEventRecord(stop, 0));
+    CHECK_CUDA_ERROR(cudaEventSynchronize(stop));
+
+    // Compute time
+    float milliseconds = 0;
+    CHECK_CUDA_ERROR(cudaEventElapsedTime(&milliseconds, start, stop));
+    cout << "Kernel took: " << milliseconds << "ms" << endl;
 
     // Copy output to host
     CHECK_CUDA_ERROR(cudaMemcpy(h_C, d_C, sizeC, cudaMemcpyDeviceToHost));
@@ -47,6 +53,10 @@ void benchmarkCudaEvents(float *h_A, float *h_B, float *h_C, int m, int k, int n
     CHECK_CUDA_ERROR(cudaFree(d_A));
     CHECK_CUDA_ERROR(cudaFree(d_B));
     CHECK_CUDA_ERROR(cudaFree(d_C));
+
+    // Cleanup
+    CHECK_CUDA_ERROR(cudaEventDestroy(start));
+    CHECK_CUDA_ERROR(cudaEventDestroy(stop));
 }
 
 int main(int argc, char **argv){
