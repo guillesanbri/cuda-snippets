@@ -30,7 +30,7 @@ void benchmarkSync(float *h_A, float *h_B, float *h_C, int m, int k, int n){
     benchmark::matMulKernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, m, k, n);
 
     // Wait for kernel to finish
-    cudaDeviceSynchronize();
+    CHECK_CUDA_ERROR(cudaDeviceSynchronize());
 
     // Finish measuring time
     auto end = chrono::steady_clock::now();
