@@ -30,6 +30,12 @@ void benchmarkColdStart(float *h_A, float *h_B, float *h_C, int m, int k, int n)
     dim3 blockDim(32, 32, 1);
     dim3 gridDim((n + blockDim.x - 1) / blockDim.x, (m + blockDim.y - 1) / blockDim.y, 1); 
 
+    // Launch the kernel a few times to avoid cold start
+    for (int i=0; i < benchmark::CS_ITERS; i++){
+        benchmark::matMulKernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, m, k, n);
+        CHECK_LAST_CUDA_ERROR();
+    }
+
     // Start measuring time
     CHECK_CUDA_ERROR(cudaEventRecord(start, 0));
 

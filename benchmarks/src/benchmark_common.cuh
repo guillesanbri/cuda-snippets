@@ -10,6 +10,9 @@
 
 namespace benchmark {
 
+    // Cold start iterations
+    const int CS_ITERS = 5;
+
     // Error Handling
     // From https://leimao.github.io/blog/Proper-CUDA-Error-Checking/
     void check(cudaError_t err, const char* const func, const char* const file,
