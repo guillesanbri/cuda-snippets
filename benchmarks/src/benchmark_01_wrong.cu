@@ -24,12 +24,14 @@ void benchmarkWrong(float *h_A, float *h_B, float *h_C, int m, int k, int n){
     CHECK_CUDA_ERROR(cudaMemcpy(d_A, h_A, sizeA, cudaMemcpyHostToDevice));
     CHECK_CUDA_ERROR(cudaMemcpy(d_B, h_B, sizeB, cudaMemcpyHostToDevice));
 
+    // Define block and grid
+    dim3 blockDim(32, 32, 1);
+    dim3 gridDim((n + blockDim.x - 1) / blockDim.x, (m + blockDim.y - 1) / blockDim.y, 1); 
+    
     // Start measuring time (wrong!)
     auto start = chrono::steady_clock::now();
 
     // Launch kernel
-    dim3 blockDim(32, 32, 1);
-    dim3 gridDim((n + blockDim.x - 1) / blockDim.x, (m + blockDim.y - 1) / blockDim.y, 1); 
     benchmark::matMulKernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, m, k, n);
 
     // Finish measuring time (wrong!)
