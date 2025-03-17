@@ -5,7 +5,12 @@
 
 using namespace std;
 
-void benchmarkColdStartDifferent(float *h_A, float *h_B, float *h_C, int m, int k, int n){
+void benchmarkColdStartDifferent(vector<float> A, vector<float> B, vector<float> C, int m, int k, int n){
+
+    float *h_A = A.data();
+    float *h_B = B.data();
+    float *h_C = C.data();
+
     // Allocate GPU memory
     float *d_A;
     float *d_B;
@@ -35,6 +40,12 @@ void benchmarkColdStartDifferent(float *h_A, float *h_B, float *h_C, int m, int 
         benchmark::matMulKernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, m, k, n);
         CHECK_LAST_CUDA_ERROR();
     }
+
+    // Randomize the matrices again
+    benchmark::randomizeVector(A);
+    benchmark::randomizeVector(B);
+    CHECK_CUDA_ERROR(cudaMemcpy(d_A, h_A, sizeA, cudaMemcpyHostToDevice));
+    CHECK_CUDA_ERROR(cudaMemcpy(d_B, h_B, sizeB, cudaMemcpyHostToDevice));
 
     // Start measuring time
     CHECK_CUDA_ERROR(cudaEventRecord(start, 0));
@@ -91,7 +102,7 @@ int main(int argc, char **argv){
     benchmark::randomizeVector(B);
 
     // Run the benchmark
-    benchmarkColdStartDifferent(A.data(), B.data(), C.data(), MATRIX_SIZE, MATRIX_SIZE, MATRIX_SIZE);
+    benchmarkColdStartDifferent(A, B, C, MATRIX_SIZE, MATRIX_SIZE, MATRIX_SIZE);
 
     return 0;
 }
