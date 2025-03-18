@@ -23,4 +23,12 @@ Adds GPU synchronization before measuring end of execution.
 
 Replaces `chrono` timers with `cudaEvents`.
 
+### **benchmark_04_coldStart.cu**
+
+Launches the kernel a few times before measuring to remove cold start.
+
+### **benchmark_05_coldStartDifferent.cu**
+
+Randomizes the input data used in the warming up kernel launches and the benchmarked launch.
+
 **WIP**
