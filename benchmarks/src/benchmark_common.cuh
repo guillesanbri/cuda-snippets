@@ -58,6 +58,9 @@ namespace benchmark {
 
     }
 
+    // Empty kernel
+    __global__ void empty() {}
+
     // Utility Functions
     inline void randomizeVector(std::vector<float>& v, float min=0, float max=100){
         std::random_device rd;

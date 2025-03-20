@@ -37,7 +37,7 @@ void benchmarkColdStartEmptyKernel(vector<float> A, vector<float> B, vector<floa
 
     // Launch the kernel a few times to avoid cold start
     for (int i=0; i < benchmark::CS_ITERS; i++){
-        benchmark::matMulKernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, m, k, n);
+        benchmark::empty<<<1, 1>>>();
         CHECK_LAST_CUDA_ERROR();
     }
 
