@@ -3,7 +3,7 @@
 This directory includes a series of CUDA source files that incrementally improve benchmarking methodology for GPU kernels.
 
 > [!IMPORTANT]  
-> This is the code for the blog post ["How to Benchmark CUDA"](https://guillesanbri.com/CUDA-Benchmarks/) which provides explanations and results for each methodology change. Worth taking a look!
+> This is the code for the blog post ["How to Benchmark CUDA Kernels"](https://guillesanbri.com/CUDA-Benchmarks/) which provides explanations and results for each methodology change. Worth taking a look!
 
 ## Final Template
 
@@ -30,5 +30,9 @@ Launches the kernel a few times before measuring to remove cold start.
 ### **benchmark_05_coldStartDifferent.cu**
 
 Randomizes the input data used in the warming up kernel launches and the benchmarked launch.
+
+### **benchmark_06_coldStartEmptyKernel.cu**
+
+Tests the effect of warming up with an empty kernel instead of using the kernel being benchmarked.
 
 **WIP**
