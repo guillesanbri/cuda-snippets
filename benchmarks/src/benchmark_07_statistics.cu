@@ -47,23 +47,30 @@ void benchmarkStatistics(vector<float> A, vector<float> B, vector<float> C, int 
     CHECK_CUDA_ERROR(cudaMemcpy(d_A, h_A, sizeA, cudaMemcpyHostToDevice));
     CHECK_CUDA_ERROR(cudaMemcpy(d_B, h_B, sizeB, cudaMemcpyHostToDevice));
 
-    // Start measuring time
-    CHECK_CUDA_ERROR(cudaEventRecord(start, 0));
+    // Results vector
+    vector<float> runtimes(benchmark::ITERS);
 
-    // Launch kernel
-    benchmark::matMulKernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, m, k, n);
+    for (int i=0; i<benchmark::ITERS; i++){
 
-    // Check for sync errors in the kernel launch
-    CHECK_LAST_CUDA_ERROR();
+        // Start measuring time
+        CHECK_CUDA_ERROR(cudaEventRecord(start, 0));
+        // Launch kernel
+        benchmark::matMulKernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, m, k, n);
+        // Check for sync errors in the kernel launch
+        CHECK_LAST_CUDA_ERROR();
+        // Stop measuring time
+        CHECK_CUDA_ERROR(cudaEventRecord(stop, 0));
+        CHECK_CUDA_ERROR(cudaEventSynchronize(stop));
+        // Compute time
+        float milliseconds = 0;
+        CHECK_CUDA_ERROR(cudaEventElapsedTime(&milliseconds, start, stop));
+        
+        // Store the measurement
+        runtimes[i] = milliseconds;
+    }
 
-    // Stop measuring time
-    CHECK_CUDA_ERROR(cudaEventRecord(stop, 0));
-    CHECK_CUDA_ERROR(cudaEventSynchronize(stop));
-
-    // Compute time
-    float milliseconds = 0;
-    CHECK_CUDA_ERROR(cudaEventElapsedTime(&milliseconds, start, stop));
-    cout << "Kernel took: " << milliseconds << "ms" << endl;
+    // Print benchmark info
+    benchmark::printResults(runtimes);
 
     // Copy output to host
     CHECK_CUDA_ERROR(cudaMemcpy(h_C, d_C, sizeC, cudaMemcpyDeviceToHost));
