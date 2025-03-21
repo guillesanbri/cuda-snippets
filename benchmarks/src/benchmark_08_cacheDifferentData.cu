@@ -67,6 +67,11 @@ void benchmarkCacheDifferentData(vector<float> A, vector<float> B, vector<float>
         
         // Store the measurement
         runtimes[i] = milliseconds;
+
+        benchmark::randomizeVector(A);
+        benchmark::randomizeVector(B);
+        CHECK_CUDA_ERROR(cudaMemcpy(d_A, h_A, sizeA, cudaMemcpyHostToDevice));
+        CHECK_CUDA_ERROR(cudaMemcpy(d_B, h_B, sizeB, cudaMemcpyHostToDevice));
     }
 
     // Print benchmark info

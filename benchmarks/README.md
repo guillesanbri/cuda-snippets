@@ -39,4 +39,8 @@ Tests the effect of warming up with an empty kernel instead of using the kernel 
 
 Adds statistics over multiple runs to make results more stable.
 
+### **benchmark_08_cacheDifferentData.cu**
+
+Randomized the input after every launch of the kernel being benchmarked.
+
 **WIP**
