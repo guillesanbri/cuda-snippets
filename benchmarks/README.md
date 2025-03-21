@@ -35,4 +35,8 @@ Randomizes the input data used in the warming up kernel launches and the benchma
 
 Tests the effect of warming up with an empty kernel instead of using the kernel being benchmarked.
 
+### **benchmark_07_statistics.cu**
+
+Adds statistics over multiple runs to make results more stable.
+
 **WIP**
