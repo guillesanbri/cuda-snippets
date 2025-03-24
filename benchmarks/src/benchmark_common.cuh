@@ -15,10 +15,10 @@
 namespace benchmark {
 
     // Cold start iterations
-    constexpr int CS_ITERS = 5;
+    constexpr int CS_ITERS = 1000;
 
     // Benchmark iterations
-    constexpr int ITERS = 1000;
+    constexpr int ITERS = 5000;
 
     // Error Handling
     // From https://leimao.github.io/blog/Proper-CUDA-Error-Checking/
