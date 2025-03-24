@@ -52,6 +52,10 @@ void benchmarkCacheDifferentData(vector<float> A, vector<float> B, vector<float>
 
     for (int i=0; i<benchmark::ITERS; i++){
 
+        if (i % 10 == 0){
+            cout << "\r" << i << "/" << benchmark::ITERS << flush;
+        }
+
         // Start measuring time
         CHECK_CUDA_ERROR(cudaEventRecord(start, 0));
         // Launch kernel
