@@ -5,10 +5,6 @@ This directory includes a series of CUDA source files that incrementally improve
 > [!IMPORTANT]  
 > This is the code for the blog post ["How to Benchmark CUDA Kernels"](https://guillesanbri.com/CUDA-Benchmarks/) which provides explanations and results for each methodology change. Worth taking a look!
 
-## Final Template
-
-The most complete template, along with some guidelines, can be found in `benchmark_00_template.cu`.
-
 ## Files Overview
 
 ### **benchmark_01_wrong.cu**
@@ -41,6 +37,8 @@ Adds statistics over multiple runs to make results more stable.
 
 ### **benchmark_08_cacheDifferentData.cu**
 
-Randomized the input after every launch of the kernel being benchmarked.
+Randomizes the input after every launch of the kernel being benchmarked.
 
-**WIP**
+### **benchmark_09_cacheFlush.cu**
+
+Flushes L2 cache memory between benchmarked runs.

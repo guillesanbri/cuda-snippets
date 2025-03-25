@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void benchmarkCacheFlush(vector<float> A, vector<float> B, vector<float> C, int m, int k, int n){
+void benchmarkCacheFlush(vector<float> A, vector<float> B, vector<float> C, int m, int k, int n, bool flush){
 
     float *h_A = A.data();
     float *h_B = B.data();
@@ -15,12 +15,23 @@ void benchmarkCacheFlush(vector<float> A, vector<float> B, vector<float> C, int 
     float *d_A;
     float *d_B;
     float *d_C;
+    float *d_F = nullptr;
     int sizeA = m * k * sizeof(float);
     int sizeB = k * n * sizeof(float);
     int sizeC = m * n * sizeof(float);
+
+    // Get size of L2 cache
+    int device = 0;
+    int l2_size = 0;
+    CHECK_CUDA_ERROR(cudaGetDevice(&device));
+    CHECK_CUDA_ERROR(cudaDeviceGetAttribute(&l2_size, cudaDevAttrL2CacheSize, device));
+    size_t sizeF = l2_size * 2;
+
     CHECK_CUDA_ERROR(cudaMalloc((void **)&d_A, sizeA));
     CHECK_CUDA_ERROR(cudaMalloc((void **)&d_B, sizeB));
     CHECK_CUDA_ERROR(cudaMalloc((void **)&d_C, sizeC));
+    CHECK_CUDA_ERROR(cudaMalloc((void **)&d_F, sizeF));
+    CHECK_CUDA_ERROR(cudaMemset((void *)d_F, 0, sizeF));
 
     // Copy input data to device
     CHECK_CUDA_ERROR(cudaMemcpy(d_A, h_A, sizeA, cudaMemcpyHostToDevice));
@@ -52,6 +63,12 @@ void benchmarkCacheFlush(vector<float> A, vector<float> B, vector<float> C, int 
 
     for (int i=0; i<benchmark::ITERS; i++){
 
+        if (flush){
+            CHECK_CUDA_ERROR(cudaMemsetAsync((void *)d_F, 0, sizeF));
+            CHECK_CUDA_ERROR(cudaDeviceSynchronize());
+            CHECK_LAST_CUDA_ERROR();    
+        }
+        
         // Start measuring time
         CHECK_CUDA_ERROR(cudaEventRecord(start, 0));
         // Launch kernel
@@ -79,6 +96,7 @@ void benchmarkCacheFlush(vector<float> A, vector<float> B, vector<float> C, int 
     CHECK_CUDA_ERROR(cudaFree(d_A));
     CHECK_CUDA_ERROR(cudaFree(d_B));
     CHECK_CUDA_ERROR(cudaFree(d_C));
+    CHECK_CUDA_ERROR(cudaFree(d_F));
 
     // Cleanup
     CHECK_CUDA_ERROR(cudaEventDestroy(start));
@@ -109,7 +127,8 @@ int main(int argc, char **argv){
     benchmark::randomizeVector(B);
 
     // Run the benchmark
-    benchmarkCacheFlush(A, B, C, MATRIX_SIZE, MATRIX_SIZE, MATRIX_SIZE);
+    benchmarkCacheFlush(A, B, C, MATRIX_SIZE, MATRIX_SIZE, MATRIX_SIZE, true);
+    benchmarkCacheFlush(A, B, C, MATRIX_SIZE, MATRIX_SIZE, MATRIX_SIZE, false);
 
     return 0;
 }
